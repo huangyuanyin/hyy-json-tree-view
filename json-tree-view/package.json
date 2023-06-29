@@ -1,0 +1,20 @@
+{
+  "name": "hyy-json-tree-view",
+  "version": "1.0.0",
+  "author": "huangyuanyin",
+  "description": "一个用于展示 json 树视图的插件",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/huangyuanyin/hyy-json-tree-view"
+  },
+  "homepage": "https://github.com/huangyuanyin/hyy-json-tree-view",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "json",
+    "json-tree"
+  ],
+  "license": "ISC"
+}
