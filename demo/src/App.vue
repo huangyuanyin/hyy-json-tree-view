@@ -21,7 +21,8 @@ onMounted(() => {
     expandBtnPosition: 'default', // left
     showLine: true,
     showExpandBtn: true,
-    showHover: true
+    showHover: true,
+    showRowNum: true
   })
   jsonTreeView.stringify(jsonStr.value)
 })
