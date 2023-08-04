@@ -27,7 +27,7 @@ watch(
     return jsonStr.value
   },
   () => {
-    clearTimeout(timer)
+    clearTimeout(timer!)
     timer = setTimeout(() => {
       jsonTreeView.stringify(jsonStr.value)
     }, 300)
