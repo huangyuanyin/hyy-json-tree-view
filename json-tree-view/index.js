@@ -11,7 +11,8 @@ class JsonTreeView {
     showLine = false,
     showExpandBtn = true,
     showHover = true,
-    showRowNum = false
+    showRowNum = false,
+    errorSliceNum = 20
   }) {
     this.el = type(el) === 'string' ? document.querySelector(el) : el
     if (!el) throw new Error('请提供容器元素！')
@@ -20,13 +21,16 @@ class JsonTreeView {
     this.showExpandBtn = showExpandBtn // 是否显示展开收起按钮
     this.showHover = showHover // 是否显示鼠标滑入的高亮效果
     this.showRowNum = showRowNum // 是否显示行数
+    this.errorSliceNum = errorSliceNum // 出错位置前后截取的字符串长度
     this.wrap = null // 总的容器元素
     this.rowWrap = null // 渲染行的容器元素
     this.treeWrap = null // 渲染json树的容器元素
+    this.errorWrap = null // 错误信息容器元素
     this.uniqueId = 0 // 每一层的id（唯一的id）
     this.lastMouseoverEl = null // 上一次鼠标滑入的元素
     this.oneRowHeight = -1 // 一行元素的高度
     this.lastRenderRows = 0 // 上一次渲染的行数
+    this.hasError = false // 是否出现了错误
     this.init()
     this.bindEvent()
   }
@@ -46,6 +50,9 @@ class JsonTreeView {
       this.expandBtnPosition === 'left' ? 'addPadding' : ''
     }`
     this.wrap.appendChild(this.treeWrap)
+    // 错误信息容器
+    this.errorWrap = document.createElement('div')
+    this.errorWrap.className = 'errorWrap'
     this.el.appendChild(this.wrap)
   }
 
@@ -62,7 +69,7 @@ class JsonTreeView {
   }
 
   // 销毁
-  destory() {
+  destroy() {
     this.wrap.removeEventListener('click', this.onClick)
     if (this.showHover) {
       this.wrap.removeEventListener('mouseover', this.onMouseover)
@@ -73,13 +80,47 @@ class JsonTreeView {
 
   // 格式化
   stringify(data) {
-    if (typeof data === 'string') {
-      data = JSON.parse(data)
+    try {
+      if (typeof data === 'string') {
+        if (data.trim()) {
+          data = JSON.parse(data)
+        } else {
+          // 空字符串
+          this.treeWrap.innerHTML = ''
+          return
+        }
+      }
+      // 如果上一次解析出错，这次解析成功了，需要清空错误信息
+      if (this.hasError) {
+        this.hasError = false
+        this.treeWrap.removeChild(this.errorWrap)
+      }
+      this.treeWrap.innerHTML = `<div class="row">${this.stringifyToHtml(
+        data
+      )}</div>`
+      this.renderRows()
+    } catch (error) {
+      // 解析出错，显示错误信息
+      let str = ``
+      let msg = error.message
+      str += `<div class="errorMsg">${msg}</div>`
+      // 获取出错位置，截取出前后一段字符串
+      let res = msg.match(/position\s+(\d+)/)
+      if (res && res[1]) {
+        let position = Number(res[1])
+        str += `<div class="errorStr">${data.slice(
+          position - this.errorSliceNum,
+          position
+        )}<span class="errorPosition">${data[position]}</span>${data.slice(
+          position + 1,
+          position + this.errorSliceNum
+        )}</div>`
+      }
+      this.hasError = true
+      this.treeWrap.innerHTML = ''
+      this.errorWrap.innerHTML = str
+      this.treeWrap.appendChild(this.errorWrap)
     }
-    this.treeWrap.innerHTML = `<div class="row">${this.stringifyToHtml(
-      data
-    )}</div>`
-    this.renderRows()
   }
 
   // 将json转换成html字符串
@@ -92,7 +133,6 @@ class JsonTreeView {
       ? `<span class="expandBtn expand ${
           this.expandBtnPosition === 'left' ? 'inLeft' : ''
         }" data-id='${id}'>
-        <svg data-v-2ac842d8="" fill="#747983" viewBox="0 0 24 24" style="vertical-align: middle; color: rgb(1, 160, 228); height: 1em; width: 1em;" preserveAspectRatio="xMidYMid meet"><path data-v-2ac842d8="" d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7,13H17V11H7"></path></svg>
         </span>`
       : '' // 根据 this.showExpandBtn 的值，生成展开收起按钮的 HTML 字符串，存储在 expandBtnStr 中
     switch (dataType) {
@@ -223,7 +263,7 @@ class JsonTreeView {
   // 处理点击事件
   onClick(e) {
     // 获取点击的元素的父级元素
-    let target = e.target.parentNode
+    let target = e.target
     // 如果点击的是展开收起按钮
     if (target.classList.contains('expandBtn')) {
       // 当前是否是展开状态
@@ -247,13 +287,11 @@ class JsonTreeView {
       if (isExpand) {
         target.classList.remove('expand')
         target.classList.add('unExpand')
-        target.innerHTML = `<svg data-v-2ac842d8="" fill="#747983" viewBox="0 0 24 24" style="vertical-align: middle; color: rgb(161, 106, 148); height: 1em; width: 1em;" preserveAspectRatio="xMidYMid meet"><path data-v-2ac842d8="" d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M13,7H11V11H7V13H11V17H13V13H17V11H13V7Z"></path></svg>        `
         el.style.display = 'none'
         ellipsisEl.style.display = 'block'
       } else {
         target.classList.remove('unExpand')
         target.classList.add('expand')
-        target.innerHTML = `<svg data-v-2ac842d8="" fill="#747983" viewBox="0 0 24 24" style="vertical-align: middle; color: rgb(1, 160, 228); height: 1em; width: 1em;" preserveAspectRatio="xMidYMid meet"><path data-v-2ac842d8="" d="M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7,13H17V11H7"></path></svg>        `
         el.style.display = 'block'
         ellipsisEl.style.display = 'none'
       }
@@ -280,6 +318,32 @@ class JsonTreeView {
     if (this.lastMouseoverEl) {
       this.lastMouseoverEl.classList.remove('hover')
     }
+  }
+
+  // 收起所有
+  unExpandAll() {
+    this.handleToggleExpandAll('expand')
+  }
+
+  // 展开所有
+  expandAll() {
+    this.handleToggleExpandAll('unExpand')
+  }
+
+  // 处理展开所有和收起所有
+  handleToggleExpandAll(type) {
+    let walk = el => {
+      if (el.classList.contains('expandBtn') && el.classList.contains(type)) {
+        this.onClick({
+          target: el
+        })
+      }
+      let children = Array.from(el.children)
+      children.forEach(item => {
+        walk(item)
+      })
+    }
+    walk(this.treeWrap)
   }
 }
 

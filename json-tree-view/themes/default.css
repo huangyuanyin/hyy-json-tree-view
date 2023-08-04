@@ -3,21 +3,34 @@
   display: flex;
   font-size: 17px;
   font-family: Consolas !important;
+  /* padding: 10px; */
+  margin: 0;
+  box-sizing: border-box;
 }
 
+.hyyJsonTreeViewContainer_abc123 * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/*行数容器*/
 .hyyJsonTreeViewContainer_abc123 .rowWrap {
   background-color: rgb(250, 250, 250);
   padding: 0px 8px;
   border-right: 1px dashed rgb(229, 235, 238);
   color: rgb(153, 153, 153);
   margin-right: 5px;
+  flex-shrink: 0;
 }
 
 .hyyJsonTreeViewContainer_abc123 .rowWrap .rowNum {
  line-height: 26px;
 }
 
+/*树容器*/
 .hyyJsonTreeViewContainer_abc123 .treeWrap {
+  width: 100%;
   position: relative;
   height: max-content;
   line-height: 26px;
@@ -27,19 +40,33 @@
   padding-left: 20px;
 }
 
+/*错误信息容器*/
+.hyyJsonTreeViewContainer_abc123 .errorWrap {
+}
+
+.hyyJsonTreeViewContainer_abc123 .errorWrap .errorMsg {
+  color: #e72528;
+  margin-bottom: 20px;
+}
+.hyyJsonTreeViewContainer_abc123 .errorWrap .errorStr {
+  background-color: #f3f5f7;
+}
+.hyyJsonTreeViewContainer_abc123 .errorWrap .errorStr .errorPosition {
+  background-color: #f1592a;
+}
+
 /*展开收起按钮*/
 .hyyJsonTreeViewContainer_abc123 .expandBtn {
   cursor: pointer;
-  display: inline-block;
 }
 
-/* .hyyJsonTreeViewContainer_abc123 .expand::after,
+.hyyJsonTreeViewContainer_abc123 .expand::after,
 .hyyJsonTreeViewContainer_abc123 .unExpand::after {
   cursor: pointer;
   display: inline-block;
-  width: 14px;
-  height: 14px;
-  line-height: 14px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
   border: 1px solid #4a5560;
   border-radius: 50%;
   text-align: center;
@@ -59,7 +86,7 @@
 
 .hyyJsonTreeViewContainer_abc123 .unExpand::after {
   content: '+';
-} */
+}
 
 .hyyJsonTreeViewContainer_abc123 .expand svg,.hyyJsonTreeViewContainer_abc123 .unExpand svg{
   font-size: 20px;

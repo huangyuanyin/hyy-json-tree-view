@@ -1,6 +1,6 @@
 {
   "name": "hyy-json-tree-view",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "huangyuanyin",
   "description": "一个用于展示 json 树视图的插件",
   "repository": {
